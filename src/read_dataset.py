@@ -1,19 +1,15 @@
 
+# dataset = pd.read_csv('output_1.csv')
 
-#dataset = pd.read_csv('output_1.csv')
+
 def read_dataset(filename):
 	dataset = []
-	for name in filename:
-		file = open(name, 'r')
-		
-		for line in file:
-		    dataset.append(line.split(',',2))
-
-	for i in range(len(dataset)):
-		dataset[i][2]=dataset[i][2].replace("{","")
-		dataset[i][2]=dataset[i][2].replace("}","")
-		dataset[i][2]=dataset[i][2].split('|')
-		dataset[i][0]=float(dataset[i][0])
-		dataset[i][1]=float(dataset[i][1])
-
+	file = open(filename, 'r')
+	lines = list(file)
+	lines = lines[1:]
+	for line in lines:
+		element = line.split(',', 2)
+		element[0] = float(element[0])
+		element[1] = float(element[1])
+		dataset.append(element)
 	return dataset
