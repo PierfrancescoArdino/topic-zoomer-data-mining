@@ -1,18 +1,26 @@
-import urllib
+import urllib.error
+import urllib.request
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
+#from urllib.error import URLError
+
 
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
-
-url = "http://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers"
 headers={'User-Agent':user_agent,} 
 
 def urlToText(url):
-	request=urllib.request.Request(url,None,headers)
+	text = ""
+	try:
+		request=urllib.request.Request(url,None,headers)
 	#url = "http://news.bbc.co.uk/2/hi/health/2284783.stm"
-	html = urllib.request.urlopen(request).read()
-	soup = BeautifulSoup(html)
+	
+		html = urllib.request.urlopen(request).read()
+	
 
+		soup = BeautifulSoup(html.decode('ascii','ignore'), "html.parser")
+	#soup = BeautifulSoup(html)
+	except:
+		return ""
 	# kill all script and style elements
 	for script in soup(["script", "style"]):
 	    script.extract()    # rip it out
@@ -27,4 +35,8 @@ def urlToText(url):
 	# drop blank lines
 	text = '\n'.join(chunk for chunk in chunks if chunk)
 
+	#print(text)
 	return text
+
+
+    

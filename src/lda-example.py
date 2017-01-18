@@ -3,7 +3,7 @@ from stop_words import get_stop_words
 from nltk.stem.porter import PorterStemmer
 from gensim import corpora, models
 import gensim
-from read_url import urlToText
+from test import urlToText
 from read_dataset import read_dataset
 
 tokenizer = RegexpTokenizer(r'\w+')
@@ -13,26 +13,50 @@ en_stop = get_stop_words('en')
 
 # Create p_stemmer of class PorterStemmer
 p_stemmer = PorterStemmer()
+filenames = ['output_1.txt']
+dataset = read_dataset(filenames)
 
-dataset = read_dataset('output_1.txt')
 
-'''    
-# create sample documents
-doc_a = "Brocolli is good to eat. My brother likes to eat good brocolli, but not my mother."
-doc_b = "My mother spends a lot of time driving my brother around to baseball practice."
-doc_c = "Some health experts suggest that driving may cause increased tension and blood pressure."
-doc_d = "I often feel pressure to perform well at school, but my mother never seems to drive my brother to do better."
-doc_e = "Health professionals say that brocolli is good for your health." 
-
-# compile sample documents into a list
-doc_set = [doc_a, doc_b, doc_c, doc_d, doc_e]
-'''
 doc_set = []
+maximum = []
+minimum = []
+maximum.append(0.0)
+maximum.append(0.0)
+minimum.append(9999999999999.0)
+minimum.append(9999999999999.0)
 
+for i in range(len(dataset)):
+	if(dataset[i][0]<minimum[0]):
+		minimum[0] = dataset[i][0]
+	if(dataset[i][1]<minimum[1]):
+		minimum[1] = dataset[i][1]
+	if(dataset[i][0]>maximum[0]):
+		maximum[0] = dataset[i][0]
+	if(dataset[i][1]>maximum[1]):
+		maximum[1] = dataset[i][1]
+print(maximum)
+print(minimum)
+
+first_corner = [43.0,12.0]
+second_corner = [42.0,11.0]
+count = 0
+count2 = 0
+stop=0
 for i in range(len(dataset)):
 	url = dataset[i][2]
 	for link in url:
-		doc_set.append(urlToText(link))
+		if(first_corner[0]<dataset[i][0]<second_corner[0]) or (first_corner[0]>dataset[i][0]>second_corner[0]):
+			if(first_corner[1]<dataset[i][1]<second_corner[1]) or (first_corner[1]>dataset[i][1]>second_corner[1]):
+				if(stop==0):
+					pagecontent = urlToText(link)
+					doc_set.append(pagecontent)
+					print (count, count2)
+					count +=1
+					if (pagecontent==""):
+						count2+=1
+					if(count==100):
+						stop=1
+print ("Processing...")
 # list for tokenized documents in loop
 texts = []
 
@@ -51,7 +75,7 @@ for i in doc_set:
     
     # add tokens to list
     texts.append(stemmed_tokens)
-
+print(texts)
 # turn our tokenized documents into a id <-> term dictionary
 dictionary = corpora.Dictionary(texts)
     
@@ -59,6 +83,6 @@ dictionary = corpora.Dictionary(texts)
 corpus = [dictionary.doc2bow(text) for text in texts]
 
 # generate LDA model
-ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=4, id2word = dictionary, passes=20)
+ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=2, id2word = dictionary, passes=20)
 
-print(ldamodel.print_topic(0, topn=4))
+print(ldamodel.print_topic(0, topn=2))
