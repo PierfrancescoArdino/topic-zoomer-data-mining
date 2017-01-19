@@ -8,9 +8,9 @@ from filter_text import clean_text
 import re
 
 topics_no = 3
-topic_words = 4
+topic_words = 3
 #Read the dataset
-filename = "data/dataset.csv"
+filename = "data/subset.csv"
 output = open('data/results.csv','w')
 reg = r"\""
 reg_compiled = re.compile(reg)
@@ -39,7 +39,7 @@ print(maximum)
 print(minimum)
 
 #Here we divide the area in SxS squares
-s = 25
+s = 2
 #Here we calculate the number of squares needed
 base = ((maximum[0]-minimum[0])/s)+0.5
 height = ((maximum[1]-minimum[1])/s)+0.5
@@ -54,6 +54,7 @@ text = [ [[] for i in range(0,base)] for j in range(0,height)]
 first_corner = [0.0, 0.0]
 second_corner = [0.0, 0.0]
 print("Dimensions: ", height, base)
+print("Dataset pre-processing")
 for element in dataset:
 	#find x position
 	b=int(round(((element[0]-minimum[0])/s)+0.5))
@@ -71,7 +72,7 @@ for b in range(0,base):
 	for h in range(0,height):
 		corpus[h][b], dictionary[h][b] = clean_text(text[h][b])
 		count=count +1
-
+		print (count,"/",base*height)
 #print (height*base)
 #print (count)
 
@@ -79,9 +80,15 @@ print ("Processing...")
 # generating lda model
 ldamodelMatrix=[ [[] for i in range(0,base)] for j in range(0,height)]
 emptyMatrix=[ [[] for i in range(0,base)] for j in range(0,height)]
+count = 1
 for b in range(base):
 	for h in range(height):
+		print (count,"/",base*height)
+		count=count +1
 		try:
+			#Multicore variant
+			#ldamodelMatrix[h][b] = gensim.models.ldamulticore.LdaMulticore(corpus[h][b], num_topics=topics_no, id2word=dictionary[h][b], passes=20)
+
 			ldamodelMatrix[h][b] = gensim.models.ldamodel.LdaModel(corpus[h][b], num_topics=topics_no, id2word=dictionary[h][b], passes=20)
 			emptyMatrix[h][b]=1
 		except:
