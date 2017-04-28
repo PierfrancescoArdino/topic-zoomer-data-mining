@@ -61,6 +61,7 @@ if (s%old_size != 0):
 	second_corner = [0.0, 0.0]
 	print("Dimensions: ", height, base)
 	print("Dataset pre-processing")
+	count=0
 	for element in dataset:
 		#find x position
 		b=int(round(((element[0]-minimum[0])/s)+0.5))
@@ -72,15 +73,8 @@ if (s%old_size != 0):
 			b=1
 		#print(h-1, b-1)
 		text[h-1][b-1].append(element[2])
-
-	count=0
-	for b in range(0,base):
-		for h in range(0,height):
-			corpus[h][b], dictionary[h][b] = clean_text(text[h][b])
-			count=count +1
-			print (count,"/",base*height)
-	#print (height*base)
-	#print (count)
+		count=count +1
+		print (count,"/",base*height)
 
 	print ("Processing...")
 	# generating lda model
@@ -92,6 +86,7 @@ if (s%old_size != 0):
 			print (count,"/",base*height)
 			count=count +1
 			try:
+				corpus[h][b], dictionary[h][b] = clean_text(text[h][b])
 				#Multicore variant
 				#ldamodelMatrix[h][b] = gensim.models.ldamulticore.LdaMulticore(corpus[h][b], num_topics=topics_no, id2word=dictionary[h][b], passes=20)
 				ldamodelMatrix[h][b] = gensim.models.ldamodel.LdaModel(corpus[h][b], num_topics=topics_no, id2word=dictionary[h][b], passes=30)
