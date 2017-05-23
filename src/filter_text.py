@@ -18,27 +18,30 @@ stop_words = en_stop + it_stop
 p_stemmer = PorterStemmer()
 
 
-def clean_text(doc_set):
-	
+def create_dict(dataset):
 	texts = []
-
+	texts_for_dict = []
 	# loop through document list
-	for i in doc_set:
-	# clean and tokenize document string
-		raw = i.lower()
+	for i in dataset:
+		# clean and tokenize document string
+		raw = i[2].lower()
 		raw = reg_compiled.sub('', raw)
 		raw = reg2_compiled.sub('', raw)
 		tokens = tokenizer.tokenize(raw)
-		
-	# remove stop words from tokens
+
+		# remove stop words from tokens
 		stopped_tokens = [i for i in tokens if not i in stop_words]
-	# stem tokens
-		#stemmed_tokens = [p_stemmer.stem(i) for i in stopped_tokens]
-	# add tokens to list
-		texts.append(stopped_tokens)
+		# stem tokens
+		# stemmed_tokens = [p_stemmer.stem(i) for i in stopped_tokens]
+		# add tokens to list
+		texts_for_dict.append(stopped_tokens)
+		texts.append([i[0],i[1],stopped_tokens])
 	# turn our tokenized documents into a id <-> term dictionary
-	dictionary = corpora.Dictionary(texts)
-	    
+	dictionary = corpora.Dictionary(texts_for_dict)
+	return dictionary, texts
+
+
+def create_corpus(doc_set, dictionary):
 	# convert tokenized documents into a document-term matrix
-	corpus = [dictionary.doc2bow(text) for text in texts]
-	return corpus, dictionary
+	corpus = [dictionary.doc2bow(text) for text in doc_set]
+	return corpus

@@ -5,7 +5,8 @@ __pycache__/
 *.csv
 # C extensions
 *.so
-
+*.p
+*.model*
 # Distribution / packaging
 .Python
 env/
