@@ -3,6 +3,7 @@ from stop_words import get_stop_words
 from nltk.stem.porter import PorterStemmer
 from gensim import corpora, models
 import gensim
+import operator
 import re
 
 tokenizer = RegexpTokenizer(r"[a-zA-Z]+")
@@ -45,3 +46,20 @@ def create_corpus(doc_set, dictionary):
 	# convert tokenized documents into a document-term matrix
 	corpus = [dictionary.doc2bow(text) for text in doc_set]
 	return corpus
+
+
+def topic_update(corpus, topics, dict_corpus):
+	topic_occ = {}
+	for topic in topics:
+		for page in corpus:
+			for token in page:
+				if dict_corpus[token[0]] == topic:
+					if topic not in topic_occ:
+						topic_occ[topic]=token[1]
+					else:
+						topic_occ[topic] += token[1]
+	total_token = sum(v for k,v in topic_occ.items())
+	for key, value in topic_occ.items():
+		topic_occ[key] = value/total_token
+	topic_occ_sorted = sorted(topic_occ.items(), key=operator.itemgetter(1), reverse=True)
+	return [topic_occ_sorted[i][0] for i in range(0, min(3, len(topic_occ_sorted)))]

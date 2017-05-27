@@ -3,7 +3,7 @@ from nltk.tokenize import RegexpTokenizer
 from gensim import models
 import gensim
 from read_dataset import read_dataset
-from utils import create_corpus, create_dict
+from utils import create_corpus, create_dict, topic_update
 import re, pickle, sys, time, argparse
 from collections import namedtuple
 
@@ -110,7 +110,6 @@ def compute(filename, s, recomputation):
 	#The first corner is the top-left corner, the second corner is the bottom-right corner
 	#corpus=[height][length]
 	corpus = [[[] for i in range(0, length)] for j in range(0, height)]
-	dictionary = [[[] for i in range(0, length)] for j in range(0, height)]
 	text = [[[] for i in range(0, length)] for j in range(0, height)]
 	first_corner = [0.0, 0.0]
 	second_corner = [0.0, 0.0]
@@ -119,6 +118,7 @@ def compute(filename, s, recomputation):
 	if s % old_size != 0:
 		count=0
 		dict_dataset, clean_dataset = create_dict(dataset)
+		print(dict_dataset)
 		for page in clean_dataset:
 			y,x = is_inside(page, top_left, bottom_right, s, squares)
 			text[y][x].append(page[2])
@@ -144,6 +144,7 @@ def compute(filename, s, recomputation):
 			pickle.dump(length,open("../data/length.p", 'wb'))
 			pickle.dump(s,open("../data/s.p", 'wb'))
 			pickle.dump(corpus,open("../data/corpus.p", 'wb'))
+			pickle.dump(dict_dataset,open("../data/dict_dataset.p", 'wb'))
 			for y in range(height):
 				for x in range(length):
 					if ldamodelMatrix[y][x]:
@@ -152,6 +153,7 @@ def compute(filename, s, recomputation):
 		length_old = pickle.load(open("../data/length.p", 'rb'))
 		height_old = pickle.load(open("../data/height.p", 'rb'))
 		corpus_old = pickle.load(open("../data/corpus.p", 'rb'))
+		dict_dataset = pickle.load(open("../data/dict_dataset.p", 'rb'))
 		to_merge = int(s/old_size)
 		length_old = length * to_merge
 		height_old = height * to_merge
@@ -171,36 +173,78 @@ def compute(filename, s, recomputation):
 					ldamodelMatrix_old[y][x] = models.LdaModel.load("../data/lda("+str(y)+")("+str(x)+").model")
 				except:
 					ldamodelMatrix_old[y][x] = []
-		# START REC STUPID USING LDA UPDATE
-		y_old = 0
-		x_old = 0
-		y = 0
-		x = 0
-		print(corpus_old)
-		ldamodelMatrix = [[[] for i in range(0, length)] for j in range(0, height)]
-		while y_old < height_old:
-			while x_old < length_old:
-				if (y_old + to_merge > height_old) or (x_old + to_merge > length_old):
-					break
-				corpus_to_merge = []
-				for i in range(0,to_merge):
-					for j in range(0,to_merge):
-						if not ldamodelMatrix[y][x] and corpus_old[y_old + i][x_old + j]:
-							print(corpus_old[y_old + i][x_old + j])
-							ldamodelMatrix[y][x] = ldamodelMatrix_old[y_old + i][x_old + j]
-						else:
-							print(corpus_old[y_old+i][x_old+j])
-							corpus_to_merge += corpus_old[y_old+i][x_old+j]
-				#print(corpus_to_merge)
-				if ldamodelMatrix[y][x]:
-					ldamodelMatrix[y][x].update(corpus_to_merge)
-				x_old += to_merge
-				x += 1
-			y_old += to_merge
-			y += 1
+		if recomputation == 1:
+			y_old = 0
+			x_old = 0
+			y = 0
+			x = 0
+			print(corpus_old)
+			ldamodelMatrix = [[[] for i in range(0, length)] for j in range(0, height)]
 
-		print(y_old, x_old, y, x)
-		print(ldamodelMatrix)
+			while y_old < height_old:
+				while x_old < length_old:
+					if (y_old + to_merge > height_old) or (x_old + to_merge > length_old):
+						break
+					corpus_to_merge = []
+					for i in range(0,to_merge):
+						for j in range(0,to_merge):
+							if not ldamodelMatrix[y][x] and corpus_old[y_old + i][x_old + j]:
+								#print(corpus_old[y_old + i][x_old + j])
+								ldamodelMatrix[y][x] = ldamodelMatrix_old[y_old + i][x_old + j]
+							else:
+								#print(corpus_old[y_old+i][x_old+j])
+								corpus_to_merge += corpus_old[y_old+i][x_old+j]
+					#print(corpus_to_merge)
+					if ldamodelMatrix[y][x]:
+						ldamodelMatrix[y][x].update(corpus_to_merge)
+						print(ldamodelMatrix[y][x].show_topics(num_words=topic_words, log=False, formatted=False))
+					x_old += to_merge
+					x += 1
+				y_old += to_merge
+				y += 1
+
+			print(y_old, x_old, y, x)
+			print(ldamodelMatrix)
+		elif recomputation == 2:
+			y_old = 0
+			x_old = 0
+			y = 0
+			x = 0
+			#print(corpus_old)
+			corpus_new = [[[] for i in range(0, length)] for j in range(0, height)]
+			ldamodelMatrix = [[[] for i in range(0, length)] for j in range(0, height)]
+			while y_old < height_old:
+				while x_old < length_old:
+					if (y_old + to_merge > height_old) or (x_old + to_merge > length_old):
+						break
+					topics_new_cell = []
+					for i in range(0, to_merge):
+						for j in range(0, to_merge):
+							corpus_new[y][x] += corpus_old[y_old + i][x_old + j]
+							if ldamodelMatrix_old[y_old + i][x_old + j]:
+								tmp_topic_cell = ldamodelMatrix_old[y_old + i][x_old + j].show_topics(num_words=topic_words, log=False, formatted=False)
+								for t in tmp_topic_cell:
+									for w in t[1]:
+										topics_new_cell.append(w[0])
+					topics_new_cell = set(topics_new_cell)
+					print(topics_new_cell)
+					ldamodelMatrix[y][x] = topic_update(corpus_new[y][x], topics_new_cell, dict_dataset)
+
+					"""tmp = [[] for i in range(0, topics_no)]
+					for i in range(0, to_merge):
+						for j in range(0, to_merge):
+							if ldamodelMatrix_old[y_old+i][x_old+j]:
+								for z in range(0, topics_no):
+									tmp[z] += (ldamodelMatrix_old[y_old+i][x_old+j].show_topic(z, topn=topic_words))
+					ldamodelMatrix[y][x] = topic_update(tmp)"""
+					x_old += to_merge
+					x += 1
+
+				y_old += to_merge
+				y += 1
+
+			print(y_old, x_old, y, x)
+			print(ldamodelMatrix)
 	# Print results
 	if s != old_size:
 		output = open('../data/results.csv', 'w')
@@ -213,14 +257,25 @@ def compute(filename, s, recomputation):
 					res_top_left = [float(s * x)+top_left.x, h - float(s*y)]
 					res_bottom_right = [float(s*(x+1))+top_left.x, float(h - s*(y+1))]
 					topic = []
-					for i in range(0, topics_no):
-						string = ldamodelMatrix[y][x].print_topic(i, topn=topic_words)
-						tokens = tokenizer.tokenize(string)
-						#tps = print()
-						topic.append("".join(tokens)+";")
-					topic_string= "".join(topic)
-					topic_string = reg_compiled.sub(' ', topic_string)
-					output.write(str(res_top_left[0])+","+str(res_top_left[1])+" ; "+str(res_bottom_right[0])+","+str(res_bottom_right[1])+" ; "+topic_string + "\n")
+					if recomputation !=2:
+						for i in range(0, topics_no):
+							string = ldamodelMatrix[y][x].print_topic(i, topn=topic_words)
+							tokens = tokenizer.tokenize(string)
+							#tps = print()
+							topic.append("".join(tokens)+";")
+						topic_string= "".join(topic)
+						topic_string = reg_compiled.sub(' ', topic_string)
+						output.write(str(res_top_left[0])+","+str(res_top_left[1])+" ; "+str(res_bottom_right[0])+","+str(res_bottom_right[1])+" ; "+topic_string + "\n")
+					else:
+						for i in range(0, topics_no):
+							if i < len(ldamodelMatrix[y][x]):
+								string = ldamodelMatrix[y][x][i]
+								topic.append("".join(string)+";")
+						topic_string = "".join(topic)
+						topic_string = reg_compiled.sub(' ', topic_string)
+						output.write(str(res_top_left[0]) + "," + str(res_top_left[1]) + " ; " + str(
+							res_bottom_right[0]) + "," + str(res_bottom_right[1]) + " ; " + topic_string + "\n")
+
 		output.close()
 	end_time = time.time()
 	print(end_time-start_time)
