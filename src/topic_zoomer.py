@@ -6,7 +6,7 @@ from read_dataset import read_dataset
 from utils import create_corpus, create_dict, topic_update
 import re, pickle, sys, time, argparse
 from collections import namedtuple
-
+import psutil
 
 def get_squares(topLeft, bottomRight, step):
 	# every little square is defined as topLeft and
@@ -69,6 +69,7 @@ def compute(filename, s, recomputation):
 	start_time = time.time()
 	topics_no = 3
 	topic_words = 3
+	cores = (psutil.cpu_count(logical=False))-1;
 	#Read the dataset
 	reg = r"\""
 	reg_compiled = re.compile(reg)
@@ -95,7 +96,7 @@ def compute(filename, s, recomputation):
 	print("top_left=" + str(top_left))
 	print("bottom_right=" + str(bottom_right))
 	squares = get_squares(top_left, bottom_right, s)
-	print(squares)
+	#print(squares)
 	try:
 		old_size = pickle.load(open("../data/s.p",'rb'))
 	except:
@@ -118,7 +119,7 @@ def compute(filename, s, recomputation):
 	if s % old_size != 0:
 		count=0
 		dict_dataset, clean_dataset = create_dict(dataset)
-		print(dict_dataset)
+		#print(dict_dataset)
 		for page in clean_dataset:
 			y,x = is_inside(page, top_left, bottom_right, s, squares)
 			text[y][x].append(page[2])
@@ -137,7 +138,7 @@ def compute(filename, s, recomputation):
 			#	print(corpus[y][x])
 				if corpus[y][x]:
 					# Multicore variant
-					  ldamodelMatrix[y][x] = gensim.models.ldamulticore.LdaMulticore(corpus[y][x], num_topics=topics_no, id2word=dict_dataset, passes=30)
+					  ldamodelMatrix[y][x] = gensim.models.ldamulticore.LdaMulticore(corpus[y][x], num_topics=topics_no, id2word=dict_dataset,workers = cores, passes=30)
 				    	# ldamodelMatrix[y][x] = gensim.models.ldamodel.LdaModel(corpus[y][x], num_topics=topics_no, id2word=dict_dataset, passes=30)
 		if recomputation != 0:
 			pickle.dump(height,open("../data/height.p", 'wb'))
@@ -165,7 +166,7 @@ def compute(filename, s, recomputation):
 		for element in corpus_old:
 			for i in range(0, diff):
 				element.append([])
-		print(len(corpus_old), len(corpus_old[0]))
+		#print(len(corpus_old), len(corpus_old[0]))
 		ldamodelMatrix_old = [[[] for i in range(0, length_old)] for j in range(0, height_old)]
 		for y in range(height_old):
 			for x in range(length_old):
@@ -178,7 +179,7 @@ def compute(filename, s, recomputation):
 			x_old = 0
 			y = 0
 			x = 0
-			print(corpus_old)
+			#print(corpus_old)
 			ldamodelMatrix = [[[] for i in range(0, length)] for j in range(0, height)]
 
 			while y_old < height_old:
@@ -197,14 +198,14 @@ def compute(filename, s, recomputation):
 					#print(corpus_to_merge)
 					if ldamodelMatrix[y][x]:
 						ldamodelMatrix[y][x].update(corpus_to_merge)
-						print(ldamodelMatrix[y][x].show_topics(num_words=topic_words, log=False, formatted=False))
+						#print(ldamodelMatrix[y][x].show_topics(num_words=topic_words, log=False, formatted=False))
 					x_old += to_merge
 					x += 1
 				y_old += to_merge
 				y += 1
 
-			print(y_old, x_old, y, x)
-			print(ldamodelMatrix)
+			#print(y_old, x_old, y, x)
+			#print(ldamodelMatrix)
 		elif recomputation == 2:
 			y_old = 0
 			x_old = 0
@@ -227,7 +228,7 @@ def compute(filename, s, recomputation):
 									for w in t[1]:
 										topics_new_cell.append(w[0])
 					topics_new_cell = set(topics_new_cell)
-					print(topics_new_cell)
+					#print(topics_new_cell)
 					ldamodelMatrix[y][x] = topic_update(corpus_new[y][x], topics_new_cell, dict_dataset)
 
 					"""tmp = [[] for i in range(0, topics_no)]
@@ -243,8 +244,8 @@ def compute(filename, s, recomputation):
 				y_old += to_merge
 				y += 1
 
-			print(y_old, x_old, y, x)
-			print(ldamodelMatrix)
+			#print(y_old, x_old, y, x)
+			#print(ldamodelMatrix)
 	# Print results
 	if s != old_size:
 		output = open('../data/results.csv', 'w')
@@ -253,7 +254,7 @@ def compute(filename, s, recomputation):
 		for y in range(height):
 			for x in range(length):
 				if ldamodelMatrix[y][x]:
-					print(top_left)
+					#print(top_left)
 					res_top_left = [float(s * x)+top_left.x, h - float(s*y)]
 					res_bottom_right = [float(s*(x+1))+top_left.x, float(h - s*(y+1))]
 					topic = []
