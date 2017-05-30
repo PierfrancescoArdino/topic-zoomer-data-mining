@@ -128,17 +128,17 @@ def compute(filename, s, recomputation):
 		# generating lda model
 		ldamodelMatrix = [[[] for i in range(0, length)] for j in range(0, height)]
 		count = 1
-		print(text)
+	#	print(text)
 		for y in range(height):
 			for x in range(length):
 				print(count, "/", length*height)
 				count += 1
 				corpus[y][x] = create_corpus(text[y][x], dict_dataset)
-				print(corpus[y][x])
+			#	print(corpus[y][x])
 				if corpus[y][x]:
 					# Multicore variant
-					# ldamodelMatrix[h][b] = gensim.models.ldamulticore.LdaMulticore(corpus[y][x], num_topics=topics_no, id2word=dict_dataset, passes=30)
-					ldamodelMatrix[y][x] = gensim.models.ldamodel.LdaModel(corpus[y][x], num_topics=topics_no, id2word=dict_dataset, passes=30)
+					  ldamodelMatrix[y][x] = gensim.models.ldamulticore.LdaMulticore(corpus[y][x], num_topics=topics_no, id2word=dict_dataset, passes=30)
+				    	# ldamodelMatrix[y][x] = gensim.models.ldamodel.LdaModel(corpus[y][x], num_topics=topics_no, id2word=dict_dataset, passes=30)
 		if recomputation != 0:
 			pickle.dump(height,open("../data/height.p", 'wb'))
 			pickle.dump(length,open("../data/length.p", 'wb'))
