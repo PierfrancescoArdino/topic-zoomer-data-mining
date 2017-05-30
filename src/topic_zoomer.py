@@ -271,7 +271,6 @@ def compute(filename, s, recomputation):
     end_time = time.time()
     print("Computation time is: {}".format(end_time - start_time))
 
-
 if __name__ == '__main__':
     # command line arguments
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
