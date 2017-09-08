@@ -1,0 +1,18 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Related work}{}% 2
+\BOOKMARK [1][-]{section.3}{Problem definition}{}% 3
+\BOOKMARK [1][-]{section.4}{Solution}{}% 4
+\BOOKMARK [2][-]{subsection.4.1}{Data collection and preprocessing}{section.4}% 5
+\BOOKMARK [2][-]{subsection.4.2}{Algorithm selection}{section.4}% 6
+\BOOKMARK [2][-]{subsection.4.3}{Process overview}{section.4}% 7
+\BOOKMARK [1][-]{section.5}{Implementation}{}% 8
+\BOOKMARK [2][-]{subsection.5.1}{Pseudocode}{section.5}% 9
+\BOOKMARK [2][-]{subsection.5.2}{Pre-processing}{section.5}% 10
+\BOOKMARK [2][-]{subsection.5.3}{Computation}{section.5}% 11
+\BOOKMARK [2][-]{subsection.5.4}{Printing}{section.5}% 12
+\BOOKMARK [2][-]{subsection.5.5}{Avoid-recomputation}{section.5}% 13
+\BOOKMARK [3][-]{subsubsection.5.5.1}{Recomputation with ldaUpdate}{subsection.5.5}% 14
+\BOOKMARK [3][-]{subsubsection.5.5.2}{Recomputation with topic merging}{subsection.5.5}% 15
+\BOOKMARK [1][-]{section.6}{Results}{}% 16
+\BOOKMARK [1][-]{section.7}{Conclusions and future work}{}% 17
+\BOOKMARK [1][-]{section.8}{References}{}% 18

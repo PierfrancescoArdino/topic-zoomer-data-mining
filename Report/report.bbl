@@ -1,0 +1,18 @@
+\begin{thebibliography}{1}
+
+\bibitem{gil}
+D.~Beazley.
+\newblock Understanding the python gil.
+\newblock In {\em PyCON Python Conference. Atlanta, Georgia}, 2010.
+
+\bibitem{lda}
+D.~M. Blei, A.~Y. Ng, and M.~I. Jordan.
+\newblock Latent dirichlet allocation.
+\newblock {\em Journal of machine Learning research}, 3(Jan):993--1022, 2003.
+
+\bibitem{mmd}
+J.~Leskovec, A.~Rajaraman, and J.~D. Ullman.
+\newblock {\em Mining of massive datasets}.
+\newblock Cambridge University Press, 2014.
+
+\end{thebibliography}
