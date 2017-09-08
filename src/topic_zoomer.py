@@ -147,9 +147,9 @@ def compute(filename, s, recomputation):
                         ldamodelmatrix[y][x] = gensim.models.ldamulticore.LdaMulticore(corpus[y][x],
                                                                                        num_topics=topics_no,
                                                                                        id2word=dict_dataset,
-                                                                                       workers=cores, passes=30)
+                                                                                       workers=cores, passes=50)
                         ldamodelmatrix[y][x] = gensim.models.ldamodel.LdaModel(corpus[y][x], num_topics=topics_no,
-                                                                               id2word=dict_dataset, passes=30)
+                                                                               id2word=dict_dataset, passes=50)
         if recomputation != 0:
             pickle.dump(s, open("../data/s.p", 'wb'))
             pickle.dump(corpus, open("../data/corpus.p", 'wb'))
@@ -276,7 +276,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('step', type=float, help='the square side size')
     parser.add_argument('dataset', type=str, help='the path to the input dataset')
-    parser.add_argument('recomputation', type=int, help='flag to activate recomputation, 0 no recomputation, '
+    parser.add_argument('recType', type=int, help='flag to activate recomputation, 0 no recomputation, '
                                                         '1 LdaUpdate recomputation, 2 merging recomputation')
     args = parser.parse_args()
-    compute(args.dataset, args.step, args.recomputation)
+    compute(args.dataset, args.step, args.recType)
